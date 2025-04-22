@@ -14,6 +14,7 @@ namespace Algo_Project
         public void addition(List<double> Vector1,List<double> Vector2)
         {
             List<double> Sum= new List<double>(new double[Vector1.Count]);
+
            for(int i = Vector1.Count-1; i >=0; i--)
             {
                 if (Vector1[i] + Vector2[i] >= 10)
