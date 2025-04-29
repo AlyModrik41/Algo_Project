@@ -7,82 +7,121 @@ using System.Numerics;
 
 namespace Algo_Project
 {
- 
+
     public class MyBigInteger
     {
 
-
-        public void addition(List<double> Vector1, List<double> Vector2)
+        public List<double> Addition(List<double> vector1, List<double> vector2)
         {
+           
+            List<double> v1 = new List<double>(vector1);
+            List<double> v2 = new List<double>(vector2);
 
-     
-            List<double> Sum= new List<double>(new double[Vector1.Count]);
+         
+            while (v1.Count < v2.Count) v1.Insert(0, 0);
+            while (v2.Count < v1.Count) v2.Insert(0, 0);
 
-           for(int i = Vector1.Count-1; i >=0; i--)
+            List<double> sum = new List<double>(new double[v1.Count]);
+            double carry = 0;
+
+            for (int i = v1.Count - 1; i >= 0; i--)
             {
-                if (Vector1[i] + Vector2[i] >= 10)
+                double tempSum = v1[i] + v2[i] + carry;
+
+                if (tempSum >= 10)
                 {
-                    Sum[i] += Vector1[i] + Vector2[i] - 10;
-                    Vector1[i - 1] = Vector1[i - 1] - 1;
+                    sum[i] = tempSum - 10;
+                    carry = 1;
                 }
                 else
                 {
-                    Sum[i] = Vector1[i] + Vector2[i];
+                    sum[i] = tempSum;
+                    carry = 0;
                 }
             }
-            for (int i = 0; i < Vector1.Count; i++)
+
+            if (carry > 0)
             {
-                Console.Write(Sum[i]);
+                sum.Insert(0, carry);
             }
+
+            return sum;
         }
 
-        public void subtraction(List<double> Vector1, List<double> Vector2)
+
+
+        public List<double> Subtraction(List<double> vector1, List<double> vector2)
         {
-            int m = Vector1.Count;
-            int n = Vector2.Count;
-            bool swapped = false;
-            if ( n > m || Vector1[m - 1] < Vector2[n - 1]) //vector1 < vector 2
-            { 
-                swapped = true;
-                List<double> templ = new List<double>();
-                templ = Vector1;
-                Vector1 = Vector2;
-                Vector2 = templ;
-            }
-   
-            List<double> Resault = new List<double>(new double[Vector1.Count]);
-            for (int i = Vector1.Count - 1; i >= 0; i--)
+            
+            List<double> v1 = new List<double>(vector1);
+            List<double> v2 = new List<double>(vector2);
+
+          
+            while (v1.Count < v2.Count) v1.Insert(0, 0);
+            while (v2.Count < v1.Count) v2.Insert(0, 0);
+
+            bool isNegative = false;
+
+
+            for (int i = 0; i < v1.Count; i++)
             {
-                double temp = Vector1[i] - Vector2[i];
-                if (temp < 0 )
+                if (v1[i] < v2[i])
                 {
-                    temp += 10;
-                    Vector1[i - 1]--;
+                    isNegative = true;
+                    break;
                 }
-                Resault[i] = temp;
+                else if (v1[i] > v2[i])
+                {
+                    break;
+                }
+            }
 
-            }
-  
-            if (swapped)
+            if (isNegative)
             {
-                Resault[0] = -Resault[0];
+                List<double> temp = v1;
+                v1 = v2;
+                v2 = temp;
             }
-            for (int i = 0; i < Vector1.Count; i++)
+
+
+            List<double> result = new List<double>(new double[v1.Count]);
+
+        
+            for (int i = v1.Count - 1; i >= 0; i--)
             {
-                Console.Write(Resault[i]);
+                if (v1[i] < v2[i])
+                {
+                    v1[i] += 10;
+                    v1[i - 1]--;
+                }
+                result[i] = v1[i] - v2[i];
             }
+
+            while (result.Count > 1 && result[0] == 0)
+            {
+                result.RemoveAt(0);
+            }
+
+            
+            if (isNegative)
+            {
+                result[0] *= -1;
+            }
+
+            return result;
         }
-        public void CheckEven(List<double> Vector)
+        
+        public string CheckEven_Odd(List<double> Vector)
         {
-            int m = Vector.Count;
-            double n = Vector[m - 1] % 2;
-            if (n == 1 )
+         
+            double LastDigit = Vector[Vector.Count - 1] ;
+            if (LastDigit % 2 == 0)
             {
-                Console.WriteLine("Odd"); 
+                return "Even";
             }
             else
             {
-                Console.WriteLine("Even");
+                return "Odd"; 
             }
         }
     }
@@ -90,51 +129,57 @@ namespace Algo_Project
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Testing");
+            var vec1 = new List<double> { 1, 2, 3 }; 
+            var vec2 = new List<double> { 4, 5 };
+            var vec3 = new List<double> { 1, 2, 3, 4 };
+            var vec4 = new List<double> { 4, 5, 6, 7 };
 
+            MyBigInteger bigInt = new MyBigInteger();
 
+        
 
-           
+            Console.WriteLine("Addition:");
             
-            BigInteger bigInt = new BigInteger();
+            var result = bigInt.Addition(vec1, vec2);       
+            Console.WriteLine(string.Join("", result));
+            var resultt = bigInt.Addition(vec3, vec4);
+            Console.WriteLine(string.Join("", resultt));
 
-            bigInt.addition(new List<double> { 1, 2, 3, 5 }, new List<double> { 4, 5, 6, 9 });
-            Console.WriteLine("");
 
-            Console.WriteLine("addition:");
-            bigInt.addition(new List<double> { 2, 5, 9, 1 }, new List<double> { 7, 5, 3, 8 });
-            Console.WriteLine("");
+            Console.WriteLine("Subtraction:");
 
-            Console.WriteLine("addition:");
-            bigInt.addition(new List<double> { 1, 2, 3, 5, 6 }, new List<double> { 3, 4, 5, 6, 9 });
-            Console.WriteLine("");
-
-            Console.WriteLine("subtraction:");
-            bigInt.subtraction(new List<double> { 1, 2, 3, 5 }, new List<double> { 4, 5, 6, 9 });
-            Console.WriteLine("");
-
-            Console.WriteLine("subtraction:");
-            bigInt.subtraction(new List<double> { 4, 5, 6, 9 }, new List<double> { 1, 2, 3, 5 });
-            Console.WriteLine("");
-
-            Console.WriteLine("subtraction:");
-            bigInt.subtraction(new List<double> { 1, 2, 3, 5 , 6 }, new List<double> {3, 4, 5, 6, 9 });
-            Console.WriteLine("");
-
-            Console.WriteLine("subtraction:");
-            bigInt.subtraction(new List<double> { 3, 5, 9, 1 }, new List<double> { 7, 5 ,3, 8 });
-            Console.WriteLine("");
-
-            Console.WriteLine("Even or Odd:");
-            bigInt.CheckEven(new List<double> { 7, 5, 3, 8 });
+            var sub= bigInt.Subtraction(vec1, vec2);    
+            Console.WriteLine(string.Join("", sub));
+            var subb = bigInt.Subtraction(vec4, vec3);
+            Console.WriteLine(string.Join("", subb));
+            var subt = bigInt.Subtraction(vec3, vec4);
+            Console.WriteLine(string.Join("", subt));
+            var subtr = bigInt.Subtraction(vec2, vec1);
+            Console.WriteLine(string.Join("", subtr));
+            var subtra = bigInt.Subtraction(vec1, vec1);
+            Console.WriteLine(string.Join("", subtra));
 
 
             Console.WriteLine("Even or Odd:");
-            bigInt.CheckEven(new List<double> { 3, 5, 9, 1 });
+
+            var number1 = bigInt.CheckEven_Odd(vec1);
+            Console.WriteLine(string.Join("", number1));
+            var number2 = bigInt.CheckEven_Odd(vec2);
+            Console.WriteLine(string.Join("", number2));
+            var number3 = bigInt.CheckEven_Odd(vec3);
+            Console.WriteLine(string.Join("", number3));
+            var number4 = bigInt.CheckEven_Odd(vec4);
+            Console.WriteLine(string.Join("", number4));
+
+
+
 
             Console.ReadLine();
         }
-    }
+    
 
+
+    }
 }
 
