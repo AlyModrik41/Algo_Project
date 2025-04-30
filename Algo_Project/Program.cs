@@ -265,34 +265,40 @@ namespace Algo_Project
                 return "Odd"; 
             }
         }
-        public static (List<double> quotient, List<double> remainder) Divide(List<double> dividend, List<double> divisor)
+        public  (List<double> quotient, List<double> remainder) Divide(List<double> a, List<double> b)
         {
-            // Handle division by zero
-            if (IsZero(divisor)) throw new DivideByZeroException();
+            // Handle division by zero - O(1)
+            if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
 
-            // Handle zero dividend
-            if (IsZero(dividend)) return (new List<double> { 0 }, new List<double> { 0 });
+            // Handle zero dividend - O(1)
+            if (a.Count == 1 && a[0] == 0) return (new List<double> { 0 }, new List<double> { 0 });
 
-            // Determine signs
-            bool quotientNegative = (dividend[0] < 0) ^ (divisor[0] < 0);
-            bool remainderNegative = dividend[0] < 0;
+            // Determine signs - O(1)
+            bool aNegative = a[0] < 0;
+            bool bNegative = b[0] < 0;
+            bool quotientNegative = aNegative != bNegative;
+            bool remainderNegative = aNegative;
 
-            // Work with absolute values
-            List<double> a = AbsoluteValue(dividend);
-            List<double> b = AbsoluteValue(divisor);
+            // Work with absolute values - O(N)
+            List<double> absA = a.Select(Math.Abs).ToList();
+            List<double> absB = b.Select(Math.Abs).ToList();
 
-            // Base case
-            if (Compare(a, b) < 0)
+            // Base case - O(N) for Compare
+            if (Compare(absA, absB) < 0)
             {
-                var remainder = remainderNegative ? Negate(a) : a;
+                var remainder = remainderNegative ? Negate(absA) : absA;
                 return (new List<double> { 0 }, remainder);
             }
 
-            // Recursive division
-            var (q, r) = Divide(a, Add_for_division(b, b)); // Divide by 2b
-            q = Add_for_division(q, q); // Double the quotient
+            // Recursive division - T(N/2)
+            var twoB = Addition(absB, absB); // O(N)
+            var (q, r) = Divide(absA, twoB);
 
-            if (Compare(r, b) < 0)
+            // Double quotient - O(N)
+            q = Addition(q, q);
+
+            // Adjust results - O(N) for Compare and Subtraction
+            if (Compare(r, absB) < 0)
             {
                 q = quotientNegative ? Negate(q) : q;
                 r = remainderNegative ? Negate(r) : r;
@@ -300,8 +306,8 @@ namespace Algo_Project
             }
             else
             {
-                var adjustedQ = Add_for_division(q, new List<double> { 1 });
-                var adjustedR = Subtract_for_division(r, b);
+                var adjustedQ = Addition(q, new List<double> { 1 }); // O(N)
+                var adjustedR = Subtraction(r, absB); // O(N)
                 adjustedQ = quotientNegative ? Negate(adjustedQ) : adjustedQ;
                 adjustedR = remainderNegative ? Negate(adjustedR) : adjustedR;
                 return (adjustedQ, adjustedR);
@@ -340,53 +346,7 @@ namespace Algo_Project
             return num;
         }
 
-        public static List<double> Add_for_division(List<double> a, List<double> b)
-        {
-            // Remove leading zeros and ensure a is longer than b
-            a = RemoveLeadingZeros(a);
-            b = RemoveLeadingZeros(b);
-            if (a.Count < b.Count) return Add_for_division(b, a);
-
-            List<double> result = new List<double>();
-            double carry = 0;
-            int diff = a.Count - b.Count;
-
-            // Add digit by digit from right to left
-            for (int i = a.Count - 1; i >= 0; i--)
-            {
-                double sum = a[i] + (i - diff >= 0 ? b[i - diff] : 0) + carry;
-                carry = sum >= 10 ? 1 : 0;
-                result.Insert(0, sum % 10);
-            }
-
-            if (carry > 0)
-                result.Insert(0, carry);
-
-            return RemoveLeadingZeros(result);
-        }
-
-        public static List<double> Subtract_for_division(List<double> a, List<double> b)
-        {
-            // Ensure a >= b (we handle signs in the Divide function)
-            a = RemoveLeadingZeros(a);
-            b = RemoveLeadingZeros(b);
-            if (Compare(a, b) < 0)
-                throw new ArgumentException("a must be greater than or equal to b");
-
-            List<double> result = new List<double>();
-            double borrow = 0;
-            int diff = a.Count - b.Count;
-
-            // Subtract digit by digit from right to left
-            for (int i = a.Count - 1; i >= 0; i--)
-            {
-                double sub = a[i] - borrow - (i - diff >= 0 ? b[i - diff] : 0);
-                borrow = sub < 0 ? 1 : 0;
-                result.Insert(0, sub + (borrow * 10));
-            }
-
-            return RemoveLeadingZeros(result);
-        }
+        
     }
 
 
@@ -440,20 +400,26 @@ namespace Algo_Project
             var mult = bigInt.Multiply(vec2, vec3);
             Console.WriteLine(string.Join("", mult));
             // Test Case 1: 100 / 25 = 4 R0
-            var (q1, r1) = MyBigInteger.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
+            var (q1, r1) = bigInt.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
             Console.WriteLine($"100/25 = {string.Join("", q1)} R {string.Join("", r1)}");
 
             // Test Case 2: -101 / 25 = -4 R-1
-            var (q2, r2) = MyBigInteger.Divide(new List<double> { -1, 0, 1 }, new List<double> { 2, 5 });
+            var (q2, r2) = bigInt.Divide(new List<double> { -1, 0, 1 }, new List<double> { 2, 5 });
             Console.WriteLine($"-101/25 = {string.Join("", q2)} R {string.Join("", r2)}");
 
             // Test Case 3: 123456789 / 123 = 1003713 R90
-            var (q3, r3) = MyBigInteger.Divide(new List<double> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, new List<double> { 1, 2, 3 });
+            var (q3, r3) = bigInt.Divide(new List<double> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, new List<double> { 1, 2, 3 });
             Console.WriteLine($"123456789/123 = {string.Join("", q3)} R {string.Join("", r3)}");
 
             // Test Case 4: 0 / 100 = 0 R0
-            var (q4, r4) = MyBigInteger.Divide(new List<double> { 0 }, new List<double> { 1, 0, 0 });
+            var (q4, r4) = bigInt.Divide(new List<double> { 0 }, new List<double> { 1, 0, 0 });
             Console.WriteLine($"0/100 = {string.Join("", q4)} R {string.Join("", r4)}");
+
+            var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
+            Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
+
+            var (q6, r6) = bigInt.Divide(new List<double> { 2,0,0,0,1 }, new List<double> { 1, 0, 0 });
+            Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
 
             Console.ReadLine();
         }
