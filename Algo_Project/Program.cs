@@ -149,92 +149,33 @@ namespace Algo_Project
             string high2 = num2.Substring(0, num2.Length - splitPos);
             string low2 = num2.Substring(num2.Length - splitPos);
 
+            // Convert string parts back to List<double> for helper functions
+            List<double> high1List = high1.Select(c => (double)char.GetNumericValue(c)).ToList();
+            List<double> low1List = low1.Select(c => (double)char.GetNumericValue(c)).ToList();
+            List<double> high2List = high2.Select(c => (double)char.GetNumericValue(c)).ToList();
+            List<double> low2List = low2.Select(c => (double)char.GetNumericValue(c)).ToList();
+
             // Recursive multiplications (Karatsuba steps)
-            List<double> z0 = Multiply(
-                low1.Select(c => (double)char.GetNumericValue(c)).ToList(),
-                low2.Select(c => (double)char.GetNumericValue(c)).ToList());
+            List<double> z0 = Multiply(low1List, low2List);
+            List<double> z2 = Multiply(high1List, high2List);
 
-            List<double> z1 = Multiply(
-                Add(low1, high1).Select(c => (double)char.GetNumericValue(c)).ToList(),
-                Add(low2, high2).Select(c => (double)char.GetNumericValue(c)).ToList());
+            // Compute (high1 + low1) and (high2 + low2)
+            List<double> sumHighLow1 = Addition(high1List, low1List);
+            List<double> sumHighLow2 = Addition(high2List, low2List);
 
-            List<double> z2 = Multiply(
-                high1.Select(c => (double)char.GetNumericValue(c)).ToList(),
-                high2.Select(c => (double)char.GetNumericValue(c)).ToList());
+            // Compute z1 = (high1 + low1) × (high2 + low2)
+            List<double> z1 = Multiply(sumHighLow1, sumHighLow2);
 
-            // Calculate intermediate terms
-            List<double> temp = Subtract(Subtract(z1, z2), z0);
+            // Calculate intermediate term: (z1 - z2 - z0)
+            List<double> temp = Subtraction(Subtraction(z1, z2), z0);
 
             // Combine results: z2 * 10^(2*splitPos) + temp * 10^splitPos + z0
             List<double> term1 = ShiftLeft(z2, 2 * splitPos);
             List<double> term2 = ShiftLeft(temp, splitPos);
-            List<double> result = Add(Add(term1, term2), z0);
+            List<double> result = Addition(Addition(term1, term2), z0);
 
             return result;
         }
-
-        private string Add(string a, string b)
-        {
-            int maxLength = Math.Max(a.Length, b.Length);
-            a = a.PadLeft(maxLength, '0');
-            b = b.PadLeft(maxLength, '0');
-
-            int carry = 0;
-            string result = "";
-
-            for (int i = maxLength - 1; i >= 0; i--)
-            {
-                int sum = (a[i] - '0') + (b[i] - '0') + carry;
-                carry = sum / 10;
-                result = (sum % 10) + result;
-            }
-
-            return carry > 0 ? carry + result : result;
-        }
-
-        private List<double> Add(List<double> a, List<double> b)
-        {
-            string aStr = string.Concat(a.Select(d => ((int)d).ToString()));
-            string bStr = string.Concat(b.Select(d => ((int)d).ToString()));
-            string sum = Add(aStr, bStr);
-            return sum.Select(c => (double)char.GetNumericValue(c)).ToList();
-        }
-
-
-
-        private List<double> Subtract(List<double> a, List<double> b)
-        {
-            string aStr = string.Concat(a.Select(d => ((int)d).ToString()));
-            string bStr = string.Concat(b.Select(d => ((int)d).ToString()));
-
-            int maxLength = Math.Max(aStr.Length, bStr.Length);
-            aStr = aStr.PadLeft(maxLength, '0');
-            bStr = bStr.PadLeft(maxLength, '0');
-
-            int borrow = 0;
-            string result = "";
-
-            for (int i = maxLength - 1; i >= 0; i--)
-            {
-                int digitA = (aStr[i] - '0') - borrow;
-                int digitB = bStr[i] - '0';
-
-                if (digitA < digitB)
-                {
-                    digitA += 10;
-                    borrow = 1;
-                }
-                else
-                {
-                    borrow = 0;
-                }
-
-                result = (digitA - digitB) + result;
-            }
-
-            return result.TrimStart('0').Select(c => (double)char.GetNumericValue(c)).ToList();
-        }
-
         private List<double> ShiftLeft(List<double> number, int positions)
         {
             if (number.Count == 1 && number[0] == 0)
@@ -247,7 +188,6 @@ namespace Algo_Project
             }
             return result;
         }
-       
 
 
 
@@ -397,29 +337,29 @@ namespace Algo_Project
             //var number4 = bigInt.CheckEven_Odd(vec4);
             //Console.WriteLine(string.Join("", number4));
             Console.WriteLine("Multiply:");
-            var mult = bigInt.Multiply(vec2, vec3);
+            var mult = bigInt.Multiply(vec3, vec4);
             Console.WriteLine(string.Join("", mult));
             // Test Case 1: 100 / 25 = 4 R0
-            var (q1, r1) = bigInt.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
-            Console.WriteLine($"100/25 = {string.Join("", q1)} R {string.Join("", r1)}");
+            //var (q1, r1) = bigInt.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
+            //Console.WriteLine($"100/25 = {string.Join("", q1)} R {string.Join("", r1)}");
 
-            // Test Case 2: -101 / 25 = -4 R-1
-            var (q2, r2) = bigInt.Divide(new List<double> { -1, 0, 1 }, new List<double> { 2, 5 });
-            Console.WriteLine($"-101/25 = {string.Join("", q2)} R {string.Join("", r2)}");
+            //// Test Case 2: -101 / 25 = -4 R-1
+            //var (q2, r2) = bigInt.Divide(new List<double> { -1, 0, 1 }, new List<double> { 2, 5 });
+            //Console.WriteLine($"-101/25 = {string.Join("", q2)} R {string.Join("", r2)}");
 
-            // Test Case 3: 123456789 / 123 = 1003713 R90
-            var (q3, r3) = bigInt.Divide(new List<double> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, new List<double> { 1, 2, 3 });
-            Console.WriteLine($"123456789/123 = {string.Join("", q3)} R {string.Join("", r3)}");
+            //// Test Case 3: 123456789 / 123 = 1003713 R90
+            //var (q3, r3) = bigInt.Divide(new List<double> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, new List<double> { 1, 2, 3 });
+            //Console.WriteLine($"123456789/123 = {string.Join("", q3)} R {string.Join("", r3)}");
 
-            // Test Case 4: 0 / 100 = 0 R0
-            var (q4, r4) = bigInt.Divide(new List<double> { 0 }, new List<double> { 1, 0, 0 });
-            Console.WriteLine($"0/100 = {string.Join("", q4)} R {string.Join("", r4)}");
+            //// Test Case 4: 0 / 100 = 0 R0
+            //var (q4, r4) = bigInt.Divide(new List<double> { 0 }, new List<double> { 1, 0, 0 });
+            //Console.WriteLine($"0/100 = {string.Join("", q4)} R {string.Join("", r4)}");
 
-            var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
-            Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
+            //var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
+            //Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
 
-            var (q6, r6) = bigInt.Divide(new List<double> { 2,0,0,0,1 }, new List<double> { 1, 0, 0 });
-            Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
+            //var (q6, r6) = bigInt.Divide(new List<double> { 2,0,0,0,1 }, new List<double> { 1, 0, 0 });
+            //Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
 
             Console.ReadLine();
         }
