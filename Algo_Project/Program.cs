@@ -112,6 +112,8 @@ namespace Algo_Project
         }
 
 
+
+
         public List<double> Multiply(List<double> vector1, List<double> vector2)
         {
             // Convert vectors to strings (remove decimal points if present)
@@ -176,6 +178,7 @@ namespace Algo_Project
 
             return result;
         }
+        // Helper function
         private List<double> ShiftLeft(List<double> number, int positions)
         {
             if (number.Count == 1 && number[0] == 0)
@@ -205,6 +208,9 @@ namespace Algo_Project
                 return "Odd"; 
             }
         }
+
+
+
         public  (List<double> quotient, List<double> remainder) Divide(List<double> a, List<double> b)
         {
             // Handle division by zero - O(1)
@@ -254,7 +260,10 @@ namespace Algo_Project
             }
         }
 
+
+
         // Helper methods
+
         private static bool IsZero(List<double> num)
             => num.Count == 0 || (num.Count == 1 && num[0] == 0);
 
@@ -286,7 +295,88 @@ namespace Algo_Project
             return num;
         }
 
-        
+
+
+        public List<double> Encrypt (List<double> message, List<double> e , List<double> n)
+        {
+            List<double> EncryptedMessage = Power(message,e) ;
+            EncryptedMessage = Modulus(EncryptedMessage, n);
+
+            return EncryptedMessage;
+        }
+
+
+
+
+        //helper
+        public List<double> Power(List<double> baseNum, List<double> exponent)
+        {
+            // Handle exponent = 0 (any number^0 = 1)
+            if (exponent.Count == 1 && exponent[0] == 0)
+            {
+                return new List<double> { 1 };
+            }
+
+            // Handle exponent = 1 (any number^1 = itself)
+            if (exponent.Count == 1 && exponent[0] == 1)
+            {
+                return new List<double>(baseNum);
+            }
+
+            // Check for negative exponent (not supported)
+            if (exponent[0] < 0)
+            {
+                throw new ArgumentException("Negative exponents are not supported");
+            }
+
+            // Divide exponent by 2
+            List<double> halfExponent = Divide(exponent, new List<double> { 2 }).quotient;
+            List<double> result = Power(baseNum, halfExponent);
+
+
+
+
+            if (CheckEven_Odd(exponent) == "Odd")
+            {
+                // Odd exponent: result = baseNum * result * result
+                return Multiply(Multiply(baseNum, result), result);
+            }
+            else
+            {
+                // Even exponent: result = result * result
+                return Multiply(result, result);
+            }
+        }
+
+
+
+        public List<double> Modulus(List<double> a, List<double> b)
+        {
+            // Handle division by zero - O(1)
+            if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
+            // Handle zero dividend - O(1)
+            if (a.Count == 1 && a[0] == 0) return new List<double> { 0 };
+            // Determine signs - O(1)
+            bool aNegative = a[0] < 0;
+            bool bNegative = b[0] < 0;
+            bool remainderNegative = aNegative;
+            // Work with absolute values - O(N)
+            List<double> absA = a.Select(Math.Abs).ToList();
+            List<double> absB = b.Select(Math.Abs).ToList();
+            // Base case - O(N) for Compare
+            if (Compare(absA, absB) < 0)
+                return remainderNegative ? Negate(absA) : absA;
+            // Recursive modulus - T(N/2)
+            var twoB = Addition(absB, absB); // O(N)
+            var (q, r) = Divide(absA, twoB);
+            // Adjust results - O(N) for Compare and Subtraction
+            if (Compare(r, absB) < 0)
+                return remainderNegative ? Negate(r) : r;
+            else
+                return Subtraction(r, absB);
+        }
+
+
     }
 
 
@@ -295,17 +385,19 @@ namespace Algo_Project
         static void Main(string[] args)
         {
             Console.WriteLine("Testing");
-            var vec1 = new List<double> { 1, 2, 3 }; 
-            var vec2 = new List<double> { 4, 5 };
+            var vec1 = new List<double> { 7}; 
+            var vec2 = new List<double> { 3,7,1,3};
             var vec3 = new List<double> { 1, 2, 3, 4 };
-            var vec4 = new List<double> { 4, 5, 6, 7 };
+            var vec4 = new List<double> { 4, 5, 6, 7 }; 
+            var vec5 = new List<double> { 2,0,0,3};
+           
 
             MyBigInteger bigInt = new MyBigInteger();
 
-        
+
 
             //Console.WriteLine("Addition:");
-            
+
             //var result = bigInt.Addition(vec1, vec2);       
             //Console.WriteLine(string.Join("", result));
             //var resultt = bigInt.Addition(vec3, vec4);
@@ -336,9 +428,13 @@ namespace Algo_Project
             //Console.WriteLine(string.Join("", number3));
             //var number4 = bigInt.CheckEven_Odd(vec4);
             //Console.WriteLine(string.Join("", number4));
-            Console.WriteLine("Multiply:");
-            var mult = bigInt.Multiply(vec3, vec4);
-            Console.WriteLine(string.Join("", mult));
+
+
+            //Console.WriteLine("Multiply:");
+            //var mult = bigInt.Multiply(vec3, vec4);
+            //Console.WriteLine(string.Join("", mult));
+
+
             // Test Case 1: 100 / 25 = 4 R0
             //var (q1, r1) = bigInt.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
             //Console.WriteLine($"100/25 = {string.Join("", q1)} R {string.Join("", r1)}");
@@ -361,9 +457,22 @@ namespace Algo_Project
             //var (q6, r6) = bigInt.Divide(new List<double> { 2,0,0,0,1 }, new List<double> { 1, 0, 0 });
             //Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
 
+            //Console.WriteLine("Power:");
+            //var power = bigInt.Power(vec2, vec1);
+            //Console.WriteLine(string.Join("", power));
+
+            //Console.WriteLine("Modulus:");
+            //var mod = bigInt.Modulus(vec3, vec2);
+            //Console.WriteLine(string.Join("", mod));
+            //Console.ReadLine();
+
+            Console.WriteLine("Encryption:");
+            var encryption = bigInt.Encrypt(vec5,vec1,vec2);
+            Console.WriteLine(string.Join("", encryption));
             Console.ReadLine();
+
         }
-        // Test Case 1: 100 / 25 = 4 R0
+       
        
 
 
