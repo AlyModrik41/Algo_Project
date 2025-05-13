@@ -11,7 +11,7 @@ namespace Algo_Project
     public class MyBigInteger
     {
 
-        public List<double> Addition(List<double> vector1, List<double> vector2)
+        public static List<double> Addition(List<double> vector1, List<double> vector2)
         {
 
             List<double> v1 = new List<double>(vector1);
@@ -50,7 +50,7 @@ namespace Algo_Project
 
 
 
-        public List<double> Subtraction(List<double> vector1, List<double> vector2)
+        public static List<double> Subtraction(List<double> vector1, List<double> vector2)
         {
 
             List<double> v1 = new List<double>(vector1);
@@ -114,7 +114,7 @@ namespace Algo_Project
 
 
 
-        public List<double> Multiply(List<double> vector1, List<double> vector2)
+        public static List<double> Multiply(List<double> vector1, List<double> vector2)
         {
             // Convert vectors to strings (remove decimal points if present)
             string num1 = string.Concat(vector1.Select(d => ((int)d).ToString()));
@@ -179,7 +179,7 @@ namespace Algo_Project
             return result;
         }
         // Helper function
-        private List<double> ShiftLeft(List<double> number, int positions)
+        private static List<double> ShiftLeft(List<double> number, int positions)
         {
             if (number.Count == 1 && number[0] == 0)
                 return new List<double> { 0 };
@@ -195,7 +195,7 @@ namespace Algo_Project
 
 
 
-        public string CheckEven_Odd(List<double> Vector)
+        public static string CheckEven_Odd(List<double> Vector)
         {
          
             double LastDigit = Vector[Vector.Count - 1] ;
@@ -211,7 +211,7 @@ namespace Algo_Project
 
 
 
-        public  (List<double> quotient, List<double> remainder) Divide(List<double> a, List<double> b)
+        public static (List<double> quotient, List<double> remainder) Divide(List<double> a, List<double> b)
         {
             // Handle division by zero - O(1)
             if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
@@ -297,7 +297,7 @@ namespace Algo_Project
 
 
 
-        public List<double> Encrypt (List<double> message, List<double> e , List<double> n)
+        public static List<double> Encrypt (List<double> message, List<double> e , List<double> n)
         {
             List<double> EncryptedMessage = Power(message,e) ;
             EncryptedMessage = Modulus(EncryptedMessage, n);
@@ -309,7 +309,7 @@ namespace Algo_Project
 
 
         //helper
-        public List<double> Power(List<double> baseNum, List<double> exponent)
+        public static List<double> Power(List<double> baseNum, List<double> exponent)
         {
             // Handle exponent = 0 (any number^0 = 1)
             if (exponent.Count == 1 && exponent[0] == 0)
@@ -350,7 +350,7 @@ namespace Algo_Project
 
 
 
-        public List<double> Modulus(List<double> a, List<double> b)
+        public static List<double> Modulus(List<double> a, List<double> b)
         {
             // Handle division by zero - O(1)
             if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
@@ -375,6 +375,30 @@ namespace Algo_Project
             else
                 return Subtraction(r, absB);
         }
+        public static List<double> Decryption(List<double> n, List<double> d, List<double> message)
+        {
+            return ModularExponentiation(message, d, n);
+        }
+
+        public static List<double> ModularExponentiation(List<double> baseNum, List<double> exponent, List<double> modulus)
+        {
+            List<double> result = new List<double> { 1 };
+            List<double> baseMod = Modulus(baseNum, modulus);
+            List<double> exp = new List<double>(exponent);
+
+            while (!IsZero(exp))
+            {
+                if (CheckEven_Odd(exp) == "Odd")
+                {
+                    result = Modulus(Multiply(result, baseMod), modulus);
+                }
+                exp = Divide(exp, new List<double> { 2 }).quotient;
+                baseMod = Modulus(Multiply(baseMod, baseMod), modulus);
+            }
+
+            return result;
+        }
+
 
 
     }
@@ -454,8 +478,8 @@ namespace Algo_Project
             //var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
             //Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
 
-            //var (q6, r6) = bigInt.Divide(new List<double> { 2,0,0,0,1 }, new List<double> { 1, 0, 0 });
-            //Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
+            var (q6, r6) = MyBigInteger.Divide(new List<double> {1,2}, new List<double> { 5 });
+            Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
 
             //Console.WriteLine("Power:");
             //var power = bigInt.Power(vec2, vec1);
@@ -466,10 +490,55 @@ namespace Algo_Project
             //Console.WriteLine(string.Join("", mod));
             //Console.ReadLine();
 
-            Console.WriteLine("Encryption:");
-            var encryption = bigInt.Encrypt(vec5,vec1,vec2);
-            Console.WriteLine(string.Join("", encryption));
-            Console.ReadLine();
+            //Console.WriteLine("Encryption:");
+            //var encryption = bigInt.Encrypt(vec5,vec1,vec2);
+            // Console.WriteLine(string.Join("", encryption));
+            //Console.ReadLine();
+            Console.WriteLine("Enter Number of Entries: ");
+            int num;
+            num = Convert.ToInt32(Console.ReadLine());
+            for (int i = 0; i < num; i++)
+            {
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                List<double> n, key, func;
+                int option;
+                Console.WriteLine("Write the n:");
+                n = Console.ReadLine()
+                                    .Split(' ')  // Split the input string by spaces
+                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
+                                    .Select(double.Parse)  // Convert each string to a double
+                                    .ToList(); 
+                Console.WriteLine("Write the e/d:");
+                key= Console.ReadLine()
+                    
+                                    .Split(' ')  // Split the input string by spaces
+                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
+                                    .Select(double.Parse)  // Convert each string to a double
+                                    .ToList();
+                Console.WriteLine("Write the Message: ");
+                func= Console.ReadLine()
+                                    .Split(' ')  // Split the input string by spaces
+                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
+                                    .Select(double.Parse)  // Convert each string to a double
+                                    .ToList();
+                List<double>r;
+                Console.WriteLine("Write the Operation 0/1");
+                option = Convert.ToInt32(Console.ReadLine());
+                //int time_before = System.Environment.TickCount;
+                stopwatch.Start();
+                if (option == 0) {  r = MyBigInteger.Encrypt(func, key, n); }
+                else {  r = MyBigInteger.Decryption(n, key, func); }
+                stopwatch.Stop();
+                //int time_after = System.Environment.TickCount;
+                Console.Write("Output : ");
+                Console.WriteLine(string.Join("", r));
+                Console.Write("Time Taken : " + (stopwatch.Elapsed.TotalMilliseconds) + " ms");
+                Console.WriteLine();
+                Console.WriteLine("---------------------");
+             
+
+            }
+            
 
         }
        
