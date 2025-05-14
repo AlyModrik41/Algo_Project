@@ -300,7 +300,7 @@ namespace Algo_Project
         public static List<int> Encrypt (List<int> message, List<int> e , List<int> n)
         {
             List<int> EncryptedMessage = Power(message,e) ;
-            EncryptedMessage = Modulus(EncryptedMessage, n);
+            EncryptedMessage = Divide(EncryptedMessage, n).remainder;
 
             return EncryptedMessage;
         }
@@ -350,31 +350,7 @@ namespace Algo_Project
 
 
 
-        public static List<int> Modulus(List<int> a, List<int> b)
-        {
-            // Handle division by zero - O(1)
-            if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
-            // Handle zero dividend - O(1)
-            if (a.Count == 1 && a[0] == 0) return new List<int> { 0 };
-            // Determine signs - O(1)
-            bool aNegative = a[0] < 0;
-            bool bNegative = b[0] < 0;
-            bool remainderNegative = aNegative;
-            // Work with absolute values - O(N)
-            List<int> absA = a.Select(Math.Abs).ToList();
-            List<int> absB = b.Select(Math.Abs).ToList();
-            // Base case - O(N) for Compare
-            if (Compare(absA, absB) < 0)
-                return remainderNegative ? Negate(absA) : absA;
-            // Recursive modulus - T(N/2)
-            var twoB = Addition(absB, absB); // O(N)
-            var (q, r) = Divide(absA, twoB);
-            // Adjust results - O(N) for Compare and Subtraction
-            if (Compare(r, absB) < 0)
-                return remainderNegative ? Negate(r) : r;
-            else
-                return Subtraction(r, absB);
-        }
+       
         public static List<int> Decryption(List<int> n, List<int> d, List<int> message)
         {
             return ModularExponentiation(message, d, n);
@@ -383,17 +359,17 @@ namespace Algo_Project
         public static List<int> ModularExponentiation(List<int> baseNum, List<int> exponent, List<int> modulus)
         {
             List<int> result = new List<int> { 1 };
-            List<int> baseMod = Modulus(baseNum, modulus);
+            List<int> baseMod = Divide(baseNum, modulus).remainder;
             List<int> exp = new List<int>(exponent);
 
             while (!IsZero(exp))
             {
                 if (CheckEven_Odd(exp) == "Odd")
                 {
-                    result = Modulus(Multiply(result, baseMod), modulus);
+                    result = Divide(Multiply(result, baseMod), modulus).remainder;
                 }
                 exp = Divide(exp, new List<int> { 2 }).quotient;
-                baseMod = Modulus(Multiply(baseMod, baseMod), modulus);
+                baseMod = Divide(Multiply(baseMod, baseMod), modulus).remainder;
             }
 
             return result;
@@ -478,8 +454,11 @@ namespace Algo_Project
             //var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
             //Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
 
-            var (q6, r6) = MyBigInteger.Divide(new List<int> {1,2}, new List<int> { 5 });
-            Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
+            var  r6= MyBigInteger.Divide(new List<int> {1,0,0}, new List<int> { 7 }).remainder;
+            var q6 = MyBigInteger.Divide(new List<int> { 1, 0,0 }, new List<int> { 7 }).quotient;
+            Console.WriteLine($"12/5 = {string.Join("",q6)} R {string.Join("", r6)}");
+            
+            
 
             //Console.WriteLine("Power:");
             //var power = bigInt.Power(vec2, vec1);
