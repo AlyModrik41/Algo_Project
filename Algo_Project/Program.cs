@@ -11,22 +11,22 @@ namespace Algo_Project
     public class MyBigInteger
     {
 
-        public static List<double> Addition(List<double> vector1, List<double> vector2)
+        public static List<int> Addition(List<int> vector1, List<int> vector2)
         {
 
-            List<double> v1 = new List<double>(vector1);
-            List<double> v2 = new List<double>(vector2);
+            List<int> v1 = new List<int>(vector1);
+            List<int> v2 = new List<int>(vector2);
 
 
             while (v1.Count < v2.Count) v1.Insert(0, 0);
             while (v2.Count < v1.Count) v2.Insert(0, 0);
 
-            List<double> sum = new List<double>(new double[v1.Count]);
-            double carry = 0;
+            List<int> sum = new List<int>(new int[v1.Count]);
+            int carry = 0;
 
             for (int i = v1.Count - 1; i >= 0; i--)
             {
-                double tempSum = v1[i] + v2[i] + carry;
+                int tempSum = v1[i] + v2[i] + carry;
 
                 if (tempSum >= 10)
                 {
@@ -50,11 +50,11 @@ namespace Algo_Project
 
 
 
-        public static List<double> Subtraction(List<double> vector1, List<double> vector2)
+        public static List<int> Subtraction(List<int> vector1, List<int> vector2)
         {
 
-            List<double> v1 = new List<double>(vector1);
-            List<double> v2 = new List<double>(vector2);
+            List<int> v1 = new List<int>(vector1);
+            List<int> v2 = new List<int>(vector2);
 
 
             while (v1.Count < v2.Count) v1.Insert(0, 0);
@@ -78,13 +78,13 @@ namespace Algo_Project
 
             if (isNegative)
             {
-                List<double> temp = v1;
+                List<int> temp = v1;
                 v1 = v2;
                 v2 = temp;
             }
 
 
-            List<double> result = new List<double>(new double[v1.Count]);
+            List<int> result = new List<int>(new int[v1.Count]);
 
 
             for (int i = v1.Count - 1; i >= 0; i--)
@@ -114,7 +114,7 @@ namespace Algo_Project
 
 
 
-        public static List<double> Multiply(List<double> vector1, List<double> vector2)
+        public static List<int> Multiply(List<int> vector1, List<int> vector2)
         {
             // Convert vectors to strings (remove decimal points if present)
             string num1 = string.Concat(vector1.Select(d => ((int)d).ToString()));
@@ -128,7 +128,7 @@ namespace Algo_Project
             if (string.IsNullOrEmpty(num1)) num1 = "0";
             if (string.IsNullOrEmpty(num2)) num2 = "0";
             if (num1 == "0" || num2 == "0")
-                return new List<double> { 0 };
+                return new List<int> { 0 };
 
             // Make sure both numbers have the same length by padding with leading zeros
             int maxLength = Math.Max(num1.Length, num2.Length);
@@ -139,7 +139,7 @@ namespace Algo_Project
             if (maxLength == 1)
             {
                 int product = int.Parse(num1) * int.Parse(num2);
-                return product.ToString().Select(c => (double)char.GetNumericValue(c)).ToList();
+                return product.ToString().Select(c => (int)char.GetNumericValue(c)).ToList();
             }
 
             // Split position (half the length)
@@ -152,39 +152,39 @@ namespace Algo_Project
             string low2 = num2.Substring(num2.Length - splitPos);
 
             // Convert string parts back to List<double> for helper functions
-            List<double> high1List = high1.Select(c => (double)char.GetNumericValue(c)).ToList();
-            List<double> low1List = low1.Select(c => (double)char.GetNumericValue(c)).ToList();
-            List<double> high2List = high2.Select(c => (double)char.GetNumericValue(c)).ToList();
-            List<double> low2List = low2.Select(c => (double)char.GetNumericValue(c)).ToList();
+            List<int> high1List = high1.Select(c => (int)char.GetNumericValue(c)).ToList();
+            List<int> low1List = low1.Select(c => (int)char.GetNumericValue(c)).ToList();
+            List<int> high2List = high2.Select(c => (int)char.GetNumericValue(c)).ToList();
+            List<int> low2List = low2.Select(c => (int)char.GetNumericValue(c)).ToList();
 
             // Recursive multiplications (Karatsuba steps)
-            List<double> z0 = Multiply(low1List, low2List);
-            List<double> z2 = Multiply(high1List, high2List);
+            List<int> z0 = Multiply(low1List, low2List);
+            List<int> z2 = Multiply(high1List, high2List);
 
             // Compute (high1 + low1) and (high2 + low2)
-            List<double> sumHighLow1 = Addition(high1List, low1List);
-            List<double> sumHighLow2 = Addition(high2List, low2List);
+            List<int> sumHighLow1 = Addition(high1List, low1List);
+            List<int> sumHighLow2 = Addition(high2List, low2List);
 
             // Compute z1 = (high1 + low1) × (high2 + low2)
-            List<double> z1 = Multiply(sumHighLow1, sumHighLow2);
+            List<int> z1 = Multiply(sumHighLow1, sumHighLow2);
 
             // Calculate intermediate term: (z1 - z2 - z0)
-            List<double> temp = Subtraction(Subtraction(z1, z2), z0);
+            List<int> temp = Subtraction(Subtraction(z1, z2), z0);
 
             // Combine results: z2 * 10^(2*splitPos) + temp * 10^splitPos + z0
-            List<double> term1 = ShiftLeft(z2, 2 * splitPos);
-            List<double> term2 = ShiftLeft(temp, splitPos);
-            List<double> result = Addition(Addition(term1, term2), z0);
+            List<int> term1 = ShiftLeft(z2, 2 * splitPos);
+            List<int> term2 = ShiftLeft(temp, splitPos);
+            List<int> result = Addition(Addition(term1, term2), z0);
 
             return result;
         }
         // Helper function
-        private static List<double> ShiftLeft(List<double> number, int positions)
+        private static List<int> ShiftLeft(List<int> number, int positions)
         {
             if (number.Count == 1 && number[0] == 0)
-                return new List<double> { 0 };
+                return new List<int> { 0 };
 
-            List<double> result = new List<double>(number);
+            List<int> result = new List<int>(number);
             for (int i = 0; i < positions; i++)
             {
                 result.Add(0);
@@ -195,10 +195,10 @@ namespace Algo_Project
 
 
 
-        public static string CheckEven_Odd(List<double> Vector)
+        public static string CheckEven_Odd(List<int> Vector)
         {
-         
-            double LastDigit = Vector[Vector.Count - 1] ;
+
+            int LastDigit = Vector[Vector.Count - 1] ;
             if (LastDigit % 2 == 0)
             {
                 return "Even";
@@ -211,13 +211,13 @@ namespace Algo_Project
 
 
 
-        public static (List<double> quotient, List<double> remainder) Divide(List<double> a, List<double> b)
+        public static (List<int> quotient, List<int> remainder) Divide(List<int> a, List<int> b)
         {
             // Handle division by zero - O(1)
             if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
 
             // Handle zero dividend - O(1)
-            if (a.Count == 1 && a[0] == 0) return (new List<double> { 0 }, new List<double> { 0 });
+            if (a.Count == 1 && a[0] == 0) return (new List<int> { 0 }, new List<int> { 0 });
 
             // Determine signs - O(1)
             bool aNegative = a[0] < 0;
@@ -226,14 +226,14 @@ namespace Algo_Project
             bool remainderNegative = aNegative;
 
             // Work with absolute values - O(N)
-            List<double> absA = a.Select(Math.Abs).ToList();
-            List<double> absB = b.Select(Math.Abs).ToList();
+            List<int> absA = a.Select(Math.Abs).ToList();
+            List<int> absB = b.Select(Math.Abs).ToList();
 
             // Base case - O(N) for Compare
             if (Compare(absA, absB) < 0)
             {
                 var remainder = remainderNegative ? Negate(absA) : absA;
-                return (new List<double> { 0 }, remainder);
+                return (new List<int> { 0 }, remainder);
             }
 
             // Recursive division - T(N/2)
@@ -252,7 +252,7 @@ namespace Algo_Project
             }
             else
             {
-                var adjustedQ = Addition(q, new List<double> { 1 }); // O(N)
+                var adjustedQ = Addition(q, new List<int> { 1 }); // O(N)
                 var adjustedR = Subtraction(r, absB); // O(N)
                 adjustedQ = quotientNegative ? Negate(adjustedQ) : adjustedQ;
                 adjustedR = remainderNegative ? Negate(adjustedR) : adjustedR;
@@ -264,21 +264,21 @@ namespace Algo_Project
 
         // Helper methods
 
-        private static bool IsZero(List<double> num)
+        private static bool IsZero(List<int> num)
             => num.Count == 0 || (num.Count == 1 && num[0] == 0);
 
-        private static List<double> AbsoluteValue(List<double> num)
+        private static List<int> AbsoluteValue(List<int> num)
             => num.Select(Math.Abs).ToList();
 
-        private static List<double> Negate(List<double> num)
+        private static List<int> Negate(List<int> num)
         {
-            if (IsZero(num)) return new List<double> { 0 };
-            var result = new List<double>(num);
+            if (IsZero(num)) return new List<int> { 0 };
+            var result = new List<int>(num);
             result[0] *= -1;
             return result;
         }
 
-        private static int Compare(List<double> a, List<double> b)
+        private static int Compare(List<int> a, List<int> b)
         {
             a = RemoveLeadingZeros(a);
             b = RemoveLeadingZeros(b);
@@ -288,7 +288,7 @@ namespace Algo_Project
             return 0;
         }
 
-        private static List<double> RemoveLeadingZeros(List<double> num)
+        private static List<int> RemoveLeadingZeros(List<int> num)
         {
             while (num.Count > 1 && num[0] == 0)
                 num.RemoveAt(0);
@@ -297,9 +297,9 @@ namespace Algo_Project
 
 
 
-        public static List<double> Encrypt (List<double> message, List<double> e , List<double> n)
+        public static List<int> Encrypt (List<int> message, List<int> e , List<int> n)
         {
-            List<double> EncryptedMessage = Power(message,e) ;
+            List<int> EncryptedMessage = Power(message,e) ;
             EncryptedMessage = Modulus(EncryptedMessage, n);
 
             return EncryptedMessage;
@@ -309,18 +309,18 @@ namespace Algo_Project
 
 
         //helper
-        public static List<double> Power(List<double> baseNum, List<double> exponent)
+        public static List<int> Power(List<int> baseNum, List<int> exponent)
         {
             // Handle exponent = 0 (any number^0 = 1)
             if (exponent.Count == 1 && exponent[0] == 0)
             {
-                return new List<double> { 1 };
+                return new List<int> { 1 };
             }
 
             // Handle exponent = 1 (any number^1 = itself)
             if (exponent.Count == 1 && exponent[0] == 1)
             {
-                return new List<double>(baseNum);
+                return new List<int>(baseNum);
             }
 
             // Check for negative exponent (not supported)
@@ -330,8 +330,8 @@ namespace Algo_Project
             }
 
             // Divide exponent by 2
-            List<double> halfExponent = Divide(exponent, new List<double> { 2 }).quotient;
-            List<double> result = Power(baseNum, halfExponent);
+            List<int> halfExponent = Divide(exponent, new List<int> { 2 }).quotient;
+            List<int> result = Power(baseNum, halfExponent);
 
 
 
@@ -350,19 +350,19 @@ namespace Algo_Project
 
 
 
-        public static List<double> Modulus(List<double> a, List<double> b)
+        public static List<int> Modulus(List<int> a, List<int> b)
         {
             // Handle division by zero - O(1)
             if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
             // Handle zero dividend - O(1)
-            if (a.Count == 1 && a[0] == 0) return new List<double> { 0 };
+            if (a.Count == 1 && a[0] == 0) return new List<int> { 0 };
             // Determine signs - O(1)
             bool aNegative = a[0] < 0;
             bool bNegative = b[0] < 0;
             bool remainderNegative = aNegative;
             // Work with absolute values - O(N)
-            List<double> absA = a.Select(Math.Abs).ToList();
-            List<double> absB = b.Select(Math.Abs).ToList();
+            List<int> absA = a.Select(Math.Abs).ToList();
+            List<int> absB = b.Select(Math.Abs).ToList();
             // Base case - O(N) for Compare
             if (Compare(absA, absB) < 0)
                 return remainderNegative ? Negate(absA) : absA;
@@ -375,16 +375,16 @@ namespace Algo_Project
             else
                 return Subtraction(r, absB);
         }
-        public static List<double> Decryption(List<double> n, List<double> d, List<double> message)
+        public static List<int> Decryption(List<int> n, List<int> d, List<int> message)
         {
             return ModularExponentiation(message, d, n);
         }
 
-        public static List<double> ModularExponentiation(List<double> baseNum, List<double> exponent, List<double> modulus)
+        public static List<int> ModularExponentiation(List<int> baseNum, List<int> exponent, List<int> modulus)
         {
-            List<double> result = new List<double> { 1 };
-            List<double> baseMod = Modulus(baseNum, modulus);
-            List<double> exp = new List<double>(exponent);
+            List<int> result = new List<int> { 1 };
+            List<int> baseMod = Modulus(baseNum, modulus);
+            List<int> exp = new List<int>(exponent);
 
             while (!IsZero(exp))
             {
@@ -392,7 +392,7 @@ namespace Algo_Project
                 {
                     result = Modulus(Multiply(result, baseMod), modulus);
                 }
-                exp = Divide(exp, new List<double> { 2 }).quotient;
+                exp = Divide(exp, new List<int> { 2 }).quotient;
                 baseMod = Modulus(Multiply(baseMod, baseMod), modulus);
             }
 
@@ -409,11 +409,11 @@ namespace Algo_Project
         static void Main(string[] args)
         {
             Console.WriteLine("Testing");
-            var vec1 = new List<double> { 7}; 
-            var vec2 = new List<double> { 3,7,1,3};
-            var vec3 = new List<double> { 1, 2, 3, 4 };
-            var vec4 = new List<double> { 4, 5, 6, 7 }; 
-            var vec5 = new List<double> { 2,0,0,3};
+            var vec1 = new List<int> { 7}; 
+            var vec2 = new List<int> { 3,7,1,3};
+            var vec3 = new List<int> { 1, 2, 3, 4 };
+            var vec4 = new List<int> { 4, 5, 6, 7 }; 
+            var vec5 = new List<int> { 2,0,0,3};
            
 
             MyBigInteger bigInt = new MyBigInteger();
@@ -478,7 +478,7 @@ namespace Algo_Project
             //var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
             //Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
 
-            var (q6, r6) = MyBigInteger.Divide(new List<double> {1,2}, new List<double> { 5 });
+            var (q6, r6) = MyBigInteger.Divide(new List<int> {1,2}, new List<int> { 5 });
             Console.WriteLine($"20001/100 = {string.Join("", q6)} R {string.Join("", r6)}");
 
             //Console.WriteLine("Power:");
@@ -500,28 +500,28 @@ namespace Algo_Project
             for (int i = 0; i < num; i++)
             {
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                List<double> n, key, func;
+                List<int> n, key, func;
                 int option;
                 Console.WriteLine("Write the n:");
                 n = Console.ReadLine()
                                     .Split(' ')  // Split the input string by spaces
                                     .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(double.Parse)  // Convert each string to a double
+                                    .Select(int.Parse)  // Convert each string to a double
                                     .ToList(); 
                 Console.WriteLine("Write the e/d:");
                 key= Console.ReadLine()
                     
                                     .Split(' ')  // Split the input string by spaces
                                     .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(double.Parse)  // Convert each string to a double
+                                    .Select(int.Parse)  // Convert each string to a double
                                     .ToList();
                 Console.WriteLine("Write the Message: ");
                 func= Console.ReadLine()
                                     .Split(' ')  // Split the input string by spaces
                                     .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(double.Parse)  // Convert each string to a double
+                                    .Select(int.Parse)  // Convert each string to a double
                                     .ToList();
-                List<double>r;
+                List<int> r;
                 Console.WriteLine("Write the Operation 0/1");
                 option = Convert.ToInt32(Console.ReadLine());
                 //int time_before = System.Environment.TickCount;
