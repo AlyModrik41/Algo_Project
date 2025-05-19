@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 
 
-namespace FixedRSA
+namespace RSA
 {
     public class BigIntegerRSA
     {
@@ -381,58 +381,124 @@ namespace FixedRSA
             }
 
             return Encoding.UTF8.GetString(decryptedBytes.ToArray());//O(1)
+
         }
         
     }
 
     class Program
     {
-        static void Main()
+        //static void Main()
+        //{
+        //    // RSA parameters (as in your example)
+        //    List<int> p = new List<int> { 6, 1 }; // 61
+        //    List<int> q = new List<int> { 5, 3 }; // 53
+        //    List<int> n = BigIntegerRSA.Multiply(p, q); // 3233
+        //    List<int> e = new List<int> { 1, 7 }; // 17
+        //    List<int> d = new List<int> { 2, 7, 5, 3 }; // 2753
+
+        //    Console.Write("Enter number of test cases: ");
+        //    if (!int.TryParse(Console.ReadLine(), out int testCases) || testCases < 1)
+        //    {
+        //        Console.WriteLine("Invalid number of test cases.");
+        //        return;
+        //    }
+
+        //    for (int i = 1; i <= testCases; i++)
+        //    {
+        //        Console.WriteLine($"\nTest case {i}:");
+        //        Console.Write("Enter message: ");
+        //        string message = Console.ReadLine();
+
+        //        // Encryption timing
+        //        Stopwatch swEncrypt = Stopwatch.StartNew();
+        //        string encrypted = BigIntegerRSA.EncryptString(message, e, n);
+        //        swEncrypt.Stop();
+
+        //        // Decryption timing
+        //        Stopwatch swDecrypt = Stopwatch.StartNew();
+        //        string decrypted = BigIntegerRSA.DecryptString(encrypted, d, n);
+        //        swDecrypt.Stop();
+
+        //        Console.WriteLine($"Encrypted: {encrypted}");
+        //        Console.WriteLine($"Decrypted: {decrypted}");
+        //        Console.WriteLine($"Encryption Time: {swEncrypt.Elapsed.TotalMilliseconds} ms");
+        //        Console.WriteLine($"Decryption Time: {swDecrypt.Elapsed.TotalMilliseconds} ms");
+
+        //        if (decrypted == message)
+        //            Console.WriteLine("Result: Success! Decrypted message matches the original.");
+        //        else
+        //            Console.WriteLine("Result: Failure! Decrypted message does NOT match the original.");
+        //    }
+
+        //    Console.WriteLine("\nPress any key to exit...");
+        //    Console.ReadKey();
+        //    Console.ReadLine();
+        //}
+        static void Main(string[] args)
         {
-            // RSA parameters (as in your example)
-            List<int> p = new List<int> { 6, 1 }; // 61
-            List<int> q = new List<int> { 5, 3 }; // 53
-            List<int> n = BigIntegerRSA.Multiply(p, q); // 3233
-            List<int> e = new List<int> { 1, 7 }; // 17
-            List<int> d = new List<int> { 2, 7, 5, 3 }; // 2753
-
+            Console.WriteLine("===== Fixed RSA Implementation =====");
             Console.Write("Enter number of test cases: ");
-            if (!int.TryParse(Console.ReadLine(), out int testCases) || testCases < 1)
+            int numTestCases = int.Parse(Console.ReadLine());
+
+
+            for (int t = 0; t < numTestCases; t++)
             {
-                Console.WriteLine("Invalid number of test cases.");
-                return;
-            }
+                Console.WriteLine($"\nTest Case {t + 1}:");
+                Console.WriteLine("------------------");
 
-            for (int i = 1; i <= testCases; i++)
-            {
-                Console.WriteLine($"\nTest case {i}:");
-                Console.Write("Enter message: ");
-                string message = Console.ReadLine();
+                try
+                {
+                    // Get modulus n
+                    Console.Write("Write the n: ");
+                    string n = Console.ReadLine();
 
-                // Encryption timing
-                Stopwatch swEncrypt = Stopwatch.StartNew();
-                string encrypted = BigIntegerRSA.EncryptString(message, e, n);
-                swEncrypt.Stop();
 
-                // Decryption timing
-                Stopwatch swDecrypt = Stopwatch.StartNew();
-                string decrypted = BigIntegerRSA.DecryptString(encrypted, d, n);
-                swDecrypt.Stop();
+                    // Get key (e/d)
+                    Console.Write("Write the e/d: ");
+                    string key = Console.ReadLine();
 
-                Console.WriteLine($"Encrypted: {encrypted}");
-                Console.WriteLine($"Decrypted: {decrypted}");
-                Console.WriteLine($"Encryption Time: {swEncrypt.Elapsed.TotalMilliseconds} ms");
-                Console.WriteLine($"Decryption Time: {swDecrypt.Elapsed.TotalMilliseconds} ms");
+                    // Get message
+                    Console.Write("Write the Message: ");
+                    string message = Console.ReadLine();
 
-                if (decrypted == message)
-                    Console.WriteLine("Result: Success! Decrypted message matches the original.");
-                else
-                    Console.WriteLine("Result: Failure! Decrypted message does NOT match the original.");
+
+                    // Get operation type
+                    Console.Write("Write the Operation (0 for encryption, 1 for decryption): ");
+                    int operationType = int.Parse(Console.ReadLine());
+
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    var time_before = System.Environment.TickCount;
+
+                    List<int> result;
+                    if (operationType == 0)
+                    {
+                        result = BigIntegerRSA.Encrypt(BigIntegerRSA.StringToDigits(message), BigIntegerRSA.StringToDigits(key), BigIntegerRSA.StringToDigits(n));
+                        Console.WriteLine("Encrypting...");
+                    }
+                    else
+                    {
+                        result = BigIntegerRSA.Decrypt(BigIntegerRSA.StringToDigits(message), BigIntegerRSA.StringToDigits(key), BigIntegerRSA.StringToDigits(n));
+                        Console.WriteLine("Decrypting...");
+                    }
+
+                    stopwatch.Stop();
+                    var time_after = System.Environment.TickCount;
+                    Console.WriteLine("Time Taken: " + (time_after - time_before) + " ms");
+
+                    Console.Write("Output: ");
+                    Console.WriteLine(string.Join("", result));
+                    Console.WriteLine($"Time Taken: {stopwatch.Elapsed.TotalMilliseconds} ms");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
             }
 
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadKey();
-            Console.ReadLine();
         }
     }
 }
