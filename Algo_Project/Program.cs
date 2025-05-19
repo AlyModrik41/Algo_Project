@@ -2,15 +2,56 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Numerics;
+using System.Diagnostics;
 
-namespace Algo_Project
+namespace FixedRSA
 {
-
-    public class MyBigInteger
+    public class BigIntegerRSA
     {
+        // Convert string representation to a List<int> representation
+        public static List<int> StringToDigits(string number)
+        {
+            return number.Select(c => (int)char.GetNumericValue(c)).ToList();
+        }
 
+        // Convert List<int> representation to string
+        public static string DigitsToString(List<int> digits)
+        {
+            return string.Concat(digits.Select(d => d.ToString()));
+        }
+
+        // Remove leading zeros
+        public static List<int> RemoveLeadingZeros(List<int> number)
+        {
+            if (number == null || number.Count == 0)
+                return new List<int> { 0 };
+
+            int i = 0;
+            while (i < number.Count - 1 && number[i] == 0)
+                i++;
+
+            return i > 0 ? number.GetRange(i, number.Count - i) : number;
+        }
+
+        // Compare two big integers (1 if a > b, 0 if a == b, -1 if a < b)
+        public static int Compare(List<int> a, List<int> b)
+        {
+            a = RemoveLeadingZeros(a);
+            b = RemoveLeadingZeros(b);
+
+            if (a.Count != b.Count)
+                return a.Count.CompareTo(b.Count);
+
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i] != b[i])
+                    return a[i].CompareTo(b[i]);
+            }
+
+            return 0;
+        }
+
+        // Addition with proper carrying
         public static List<int> Addition(List<int> vector1, List<int> vector2)
         {
 
@@ -198,332 +239,181 @@ namespace Algo_Project
         public static string CheckEven_Odd(List<int> Vector)
         {
 
-            int LastDigit = Vector[Vector.Count - 1] ;
+            int LastDigit = Vector[Vector.Count - 1];
             if (LastDigit % 2 == 0)
             {
                 return "Even";
             }
             else
             {
-                return "Odd"; 
+                return "Odd";
             }
         }
 
 
-
-        public static (List<int> quotient, List<int> remainder) Divide(List<int> a, List<int> b)
+        // Division and remainder calculation
+        public static (List<int> quotient, List<int> remainder) Divide(List<int> dividend, List<int> divisor)
         {
-            // Handle division by zero - O(1)
-            if (b.Count == 1 && b[0] == 0) throw new DivideByZeroException();
+            // Handle special cases
+            if (divisor.Count == 1 && divisor[0] == 0)
+                throw new DivideByZeroException();
 
-            // Handle zero dividend - O(1)
-            if (a.Count == 1 && a[0] == 0) return (new List<int> { 0 }, new List<int> { 0 });
+            dividend = RemoveLeadingZeros(dividend);
+            divisor = RemoveLeadingZeros(divisor);
 
-            // Determine signs - O(1)
-            bool aNegative = a[0] < 0;
-            bool bNegative = b[0] < 0;
-            bool quotientNegative = aNegative != bNegative;
-            bool remainderNegative = aNegative;
+            // If dividend < divisor, quotient = 0, remainder = dividend
+            if (Compare(dividend, divisor) < 0)
+                return (new List<int> { 0 }, dividend);
 
-            // Work with absolute values - O(N)
-            List<int> absA = a.Select(Math.Abs).ToList();
-            List<int> absB = b.Select(Math.Abs).ToList();
+            // Digit-by-digit long division
+            List<int> quotient = new List<int>();
+            List<int> remainder = new List<int>();
 
-            // Base case - O(N) for Compare
-            if (Compare(absA, absB) < 0)
+            foreach (int digit in dividend)
             {
-                var remainder = remainderNegative ? Negate(absA) : absA;
-                return (new List<int> { 0 }, remainder);
-            }
+                // Bring down next digit
+                remainder.Add(digit);
+                remainder = RemoveLeadingZeros(remainder);
 
-            // Recursive division - T(N/2)
-            var twoB = Addition(absB, absB); // O(N)
-            var (q, r) = Divide(absA, twoB);
-
-            // Double quotient - O(N)
-            q = Addition(q, q);
-
-            // Adjust results - O(N) for Compare and Subtraction
-            if (Compare(r, absB) < 0)
-            {
-                q = quotientNegative ? Negate(q) : q;
-                r = remainderNegative ? Negate(r) : r;
-                return (q, r);
-            }
-            else
-            {
-                var adjustedQ = Addition(q, new List<int> { 1 }); // O(N)
-                var adjustedR = Subtraction(r, absB); // O(N)
-                adjustedQ = quotientNegative ? Negate(adjustedQ) : adjustedQ;
-                adjustedR = remainderNegative ? Negate(adjustedR) : adjustedR;
-                return (adjustedQ, adjustedR);
-            }
-        }
-
-
-
-        // Helper methods
-
-        private static bool IsZero(List<int> num)
-            => num.Count == 0 || (num.Count == 1 && num[0] == 0);
-
-        private static List<int> AbsoluteValue(List<int> num)
-            => num.Select(Math.Abs).ToList();
-
-        private static List<int> Negate(List<int> num)
-        {
-            if (IsZero(num)) return new List<int> { 0 };
-            var result = new List<int>(num);
-            result[0] *= -1;
-            return result;
-        }
-
-        private static int Compare(List<int> a, List<int> b)
-        {
-            a = RemoveLeadingZeros(a);
-            b = RemoveLeadingZeros(b);
-            if (a.Count != b.Count) return a.Count.CompareTo(b.Count);
-            for (int i = 0; i < a.Count; i++)
-                if (a[i] != b[i]) return a[i].CompareTo(b[i]);
-            return 0;
-        }
-
-        private static List<int> RemoveLeadingZeros(List<int> num)
-        {
-            while (num.Count > 1 && num[0] == 0)
-                num.RemoveAt(0);
-            return num;
-        }
-
-
-
-        public static List<int> Encrypt (List<int> message, List<int> e , List<int> n)
-        {
-            List<int> EncryptedMessage = Power(message,e) ;
-            EncryptedMessage = Divide(EncryptedMessage, n).remainder;
-
-            return EncryptedMessage;
-        }
-
-
-
-
-        //helper
-        public static List<int> Power(List<int> baseNum, List<int> exponent)
-        {
-            // Handle exponent = 0 (any number^0 = 1)
-            if (exponent.Count == 1 && exponent[0] == 0)
-            {
-                return new List<int> { 1 };
-            }
-
-            // Handle exponent = 1 (any number^1 = itself)
-            if (exponent.Count == 1 && exponent[0] == 1)
-            {
-                return new List<int>(baseNum);
-            }
-
-            // Check for negative exponent (not supported)
-            if (exponent[0] < 0)
-            {
-                throw new ArgumentException("Negative exponents are not supported");
-            }
-
-            // Divide exponent by 2
-            List<int> halfExponent = Divide(exponent, new List<int> { 2 }).quotient;
-            List<int> result = Power(baseNum, halfExponent);
-
-
-
-
-            if (CheckEven_Odd(exponent) == "Odd")
-            {
-                // Odd exponent: result = baseNum * result * result
-                return Multiply(Multiply(baseNum, result), result);
-            }
-            else
-            {
-                // Even exponent: result = result * result
-                return Multiply(result, result);
-            }
-        }
-
-
-
-       
-        public static List<int> Decryption(List<int> n, List<int> d, List<int> message)
-        {
-            return ModularExponentiation(message, d, n);
-        }
-
-        public static List<int> ModularExponentiation(List<int> baseNum, List<int> exponent, List<int> modulus)
-        {
-            List<int> result = new List<int> { 1 };
-            List<int> baseMod = Divide(baseNum, modulus).remainder;
-            List<int> exp = new List<int>(exponent);
-
-            while (!IsZero(exp))
-            {
-                if (CheckEven_Odd(exp) == "Odd")
+                // Find how many times divisor goes into remainder
+                int q = 0;
+                while (Compare(remainder, divisor) >= 0)
                 {
-                    result = Divide(Multiply(result, baseMod), modulus).remainder;
+                    remainder = Subtraction(remainder, divisor); 
+                    q++;
                 }
-                exp = Divide(exp, new List<int> { 2 }).quotient;
-                baseMod = Divide(Multiply(baseMod, baseMod), modulus).remainder;
+
+                quotient.Add(q);
             }
 
-            return result;
+            return (RemoveLeadingZeros(quotient), RemoveLeadingZeros(remainder));
         }
 
+        // Calculate a^b mod m using binary exponentiation
+        public static List<int> ModPow(List<int> baseNum, List<int> exponent, List<int> modulus)
+        {
+            // Handle special cases
+            if (exponent.Count == 1 && exponent[0] == 0)
+                return new List<int> { 1 };  // x^0 = 1
 
+            // Working with copies to avoid modifying originals
+            baseNum = new List<int>(baseNum);
+            exponent = new List<int>(exponent);
 
+            // Initialize result to 1
+            List<int> result = new List<int> { 1 };
+
+            // Reduce base modulo m
+            baseNum = Divide(baseNum, modulus).remainder;
+
+            // Fixed binary exponentiation algorithm
+            // Note: We'll use string representation for binary to handle large exponents better
+            string binaryExponent = "";
+            List<int> tempExp = new List<int>(exponent);
+
+            // Convert exponent to binary form
+            while (tempExp.Count > 1 || tempExp[0] > 0)
+            {
+                var divResult = Divide(tempExp, new List<int> { 2 });
+                binaryExponent = divResult.remainder[0] + binaryExponent;
+                tempExp = divResult.quotient;
+            }
+
+            // Square and multiply algorithm
+            foreach (char bit in binaryExponent)
+            {
+                // Square
+                result = Divide(Multiply(result, result), modulus).remainder;
+
+                // Multiply if bit is 1
+                if (bit == '1')
+                {
+                    result = Divide(Multiply(result, baseNum), modulus).remainder;
+                }
+            }
+
+            return RemoveLeadingZeros(result);
+        }
+
+        // RSA Encryption: c = m^e mod n
+        public static List<int> Encrypt(List<int> message, List<int> e, List<int> n)
+        {
+            return ModPow(message, e, n);
+        }
+
+        // RSA Decryption: m = c^d mod n
+        public static List<int> Decrypt(List<int> ciphertext, List<int> d, List<int> n)
+        {
+            return ModPow(ciphertext, d, n);
+        }
     }
-
 
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Testing");
-            var vec1 = new List<int> { 7}; 
-            var vec2 = new List<int> { 3,7,1,3};
-            var vec3 = new List<int> { 1, 2, 3, 4 };
-            var vec4 = new List<int> { 4, 5, 6, 7 }; 
-            var vec5 = new List<int> { 2,0,0,3};
-           
+            Console.WriteLine("===== Fixed RSA Implementation =====");
+            Console.Write("Enter number of test cases: ");
+            int numTestCases = int.Parse(Console.ReadLine());
+    
 
-            MyBigInteger bigInt = new MyBigInteger();
-
-
-
-            //Console.WriteLine("Addition:");
-
-            //var result = bigInt.Addition(vec1, vec2);       
-            //Console.WriteLine(string.Join("", result));
-            //var resultt = bigInt.Addition(vec3, vec4);
-            //Console.WriteLine(string.Join("", resultt));
-
-
-            //Console.WriteLine("Subtraction:");
-
-            //var sub= bigInt.Subtraction(vec1, vec2);    
-            //Console.WriteLine(string.Join("", sub));
-            //var subb = bigInt.Subtraction(vec4, vec3);
-            //Console.WriteLine(string.Join("", subb));
-            //var subt = bigInt.Subtraction(vec3, vec4);
-            //Console.WriteLine(string.Join("", subt));
-            //var subtr = bigInt.Subtraction(vec2, vec1);
-            //Console.WriteLine(string.Join("", subtr));
-            //var subtra = bigInt.Subtraction(vec1, vec1);
-            //Console.WriteLine(string.Join("", subtra));
-
-
-            //Console.WriteLine("Even or Odd:");
-
-            //var number1 = bigInt.CheckEven_Odd(vec1);
-            //Console.WriteLine(string.Join("", number1));
-            //var number2 = bigInt.CheckEven_Odd(vec2);
-            //Console.WriteLine(string.Join("", number2));
-            //var number3 = bigInt.CheckEven_Odd(vec3);
-            //Console.WriteLine(string.Join("", number3));
-            //var number4 = bigInt.CheckEven_Odd(vec4);
-            //Console.WriteLine(string.Join("", number4));
-
-
-            //Console.WriteLine("Multiply:");
-            //var mult = bigInt.Multiply(vec3, vec4);
-            //Console.WriteLine(string.Join("", mult));
-
-
-            // Test Case 1: 100 / 25 = 4 R0
-            //var (q1, r1) = bigInt.Divide(new List<double> { 1, 0, 0 }, new List<double> { 2, 5 });
-            //Console.WriteLine($"100/25 = {string.Join("", q1)} R {string.Join("", r1)}");
-
-            //// Test Case 2: -101 / 25 = -4 R-1
-            //var (q2, r2) = bigInt.Divide(new List<double> { -1, 0, 1 }, new List<double> { 2, 5 });
-            //Console.WriteLine($"-101/25 = {string.Join("", q2)} R {string.Join("", r2)}");
-
-            //// Test Case 3: 123456789 / 123 = 1003713 R90
-            //var (q3, r3) = bigInt.Divide(new List<double> { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, new List<double> { 1, 2, 3 });
-            //Console.WriteLine($"123456789/123 = {string.Join("", q3)} R {string.Join("", r3)}");
-
-            //// Test Case 4: 0 / 100 = 0 R0
-            //var (q4, r4) = bigInt.Divide(new List<double> { 0 }, new List<double> { 1, 0, 0 });
-            //Console.WriteLine($"0/100 = {string.Join("", q4)} R {string.Join("", r4)}");
-
-            //var (q5, r5) = bigInt.Divide(new List<double> { 2,0,0,1 }, new List<double> { 2,0,0,1 });
-            //Console.WriteLine($"2001/2001 = {string.Join("", q5)} R {string.Join("", r5)}");
-
-            var  r6= MyBigInteger.Divide(new List<int> {1,0,0}, new List<int> { 7 }).remainder;
-            var q6 = MyBigInteger.Divide(new List<int> { 1, 0,0 }, new List<int> { 7 }).quotient;
-            Console.WriteLine($"12/5 = {string.Join("",q6)} R {string.Join("", r6)}");
-            
-            
-
-            //Console.WriteLine("Power:");
-            //var power = bigInt.Power(vec2, vec1);
-            //Console.WriteLine(string.Join("", power));
-
-            //Console.WriteLine("Modulus:");
-            //var mod = bigInt.Modulus(vec3, vec2);
-            //Console.WriteLine(string.Join("", mod));
-            //Console.ReadLine();
-
-            //Console.WriteLine("Encryption:");
-            //var encryption = bigInt.Encrypt(vec5,vec1,vec2);
-            // Console.WriteLine(string.Join("", encryption));
-            //Console.ReadLine();
-            Console.WriteLine("Enter Number of Entries: ");
-            int num;
-            num = Convert.ToInt32(Console.ReadLine());
-            for (int i = 0; i < num; i++)
+            for (int t = 0; t < numTestCases; t++)
             {
-                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                List<int> n, key, func;
-                int option;
-                Console.WriteLine("Write the n:");
-                n = Console.ReadLine()
-                                    .Split(' ')  // Split the input string by spaces
-                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(int.Parse)  // Convert each string to a double
-                                    .ToList(); 
-                Console.WriteLine("Write the e/d:");
-                key= Console.ReadLine()
-                    
-                                    .Split(' ')  // Split the input string by spaces
-                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(int.Parse)  // Convert each string to a double
-                                    .ToList();
-                Console.WriteLine("Write the Message: ");
-                func= Console.ReadLine()
-                                    .Split(' ')  // Split the input string by spaces
-                                    .Where(s => !string.IsNullOrWhiteSpace(s)) // Remove any empty or whitespace entries
-                                    .Select(int.Parse)  // Convert each string to a double
-                                    .ToList();
-                List<int> r;
-                Console.WriteLine("Write the Operation 0/1");
-                option = Convert.ToInt32(Console.ReadLine());
-                //int time_before = System.Environment.TickCount;
-                stopwatch.Start();
-                if (option == 0) {  r = MyBigInteger.Encrypt(func, key, n); }
-                else {  r = MyBigInteger.Decryption(n, key, func); }
-                stopwatch.Stop();
-                //int time_after = System.Environment.TickCount;
-                Console.Write("Output : ");
-                Console.WriteLine(string.Join("", r));
-                Console.Write("Time Taken : " + (stopwatch.Elapsed.TotalMilliseconds) + " ms");
-                Console.WriteLine();
-                Console.WriteLine("---------------------");
-             
+                Console.WriteLine($"\nTest Case {t + 1}:");
+                Console.WriteLine("------------------");
 
+                try
+                {
+                    // Get modulus n
+                    Console.Write("Write the n: ");
+                    string n = Console.ReadLine();
+
+
+                    // Get key (e/d)
+                    Console.Write("Write the e/d: ");
+                    string key = Console.ReadLine();
+
+                    // Get message
+                    Console.Write("Write the Message: ");
+                    string message = Console.ReadLine();
+
+
+                    // Get operation type
+                    Console.Write("Write the Operation (0 for encryption, 1 for decryption): ");
+                    int operationType = int.Parse(Console.ReadLine());
+
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
+                    var time_before=System.Environment.TickCount;
+
+                    List<int> result;
+                    if (operationType == 0)
+                    {
+                        result = BigIntegerRSA.Encrypt(BigIntegerRSA.StringToDigits(message), BigIntegerRSA.StringToDigits(key), BigIntegerRSA.StringToDigits(n));
+                        Console.WriteLine("Encrypting...");
+                    }
+                    else
+                    {
+                        result = BigIntegerRSA.Decrypt(BigIntegerRSA.StringToDigits(message), BigIntegerRSA.StringToDigits(key), BigIntegerRSA.StringToDigits(n));
+                        Console.WriteLine("Decrypting...");
+                    }
+
+                    stopwatch.Stop();
+                    var time_after = System.Environment.TickCount;
+                    Console.WriteLine("Time Taken: " + (time_after - time_before)+ " ms");
+
+                    Console.Write("Output: ");
+                    Console.WriteLine(string.Join("", result));
+                    Console.WriteLine($"Time Taken: {stopwatch.Elapsed.TotalMilliseconds} ms");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
             }
-            
 
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
         }
-       
-       
-
-
     }
 }
-
