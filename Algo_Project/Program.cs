@@ -293,7 +293,7 @@ namespace RSA
         }
 
         // Calculate a^b mod m using binary exponentiation
-        public static List<int> ModPow(List<int> baseNum, List<int> exponent, List<int> modulus)//O(N^2)
+        public static List<int> ModPow(List<int> baseNum, List<int> exponent, List<int> modulus)//O(N^3)
         {
             // Handle special cases
             if (exponent.Count == 1 && exponent[0] == 0)//O(1)
