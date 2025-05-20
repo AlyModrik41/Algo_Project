@@ -293,7 +293,7 @@ namespace RSA
         }
 
         // Calculate a^b mod m using binary exponentiation
-        public static List<int> ModPow(List<int> baseNum, List<int> exponent, List<int> modulus)//O(N^4)
+        public static List<int> ModPow(List<int> baseNum, List<int> exponent, List<int> modulus)//O(N^2)
         {
             // Handle special cases
             if (exponent.Count == 1 && exponent[0] == 0)//O(1)
@@ -307,7 +307,7 @@ namespace RSA
             List<int> result = new List<int> { 1 };//O(1)
 
             // Reduce base modulo m
-            baseNum = Divide(baseNum, modulus).remainder;//O(N^3)
+            baseNum = Divide(baseNum, modulus).remainder;//O(N^2)
 
             // Fixed binary exponentiation algorithm
             // Note: We'll use string representation for binary to handle large exponents better
